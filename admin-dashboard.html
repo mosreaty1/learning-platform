@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Amr Alsariti Economics</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-graduation-cap"></i>
+                <h2>Admin Panel</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active" onclick="showSection('overview')"><i class="fas fa-home"></i> Overview</a></li>
+                <li><a href="#" onclick="showSection('courses')"><i class="fas fa-book"></i> Manage Courses</a></li>
+                <li><a href="#" onclick="showSection('students')"><i class="fas fa-users"></i> Students</a></li>
+                <li><a href="#" onclick="showSection('quizzes')"><i class="fas fa-clipboard-check"></i> Quizzes</a></li>
+                <li><a href="#" onclick="showSection('assignments')"><i class="fas fa-tasks"></i> Assignments</a></li>
+                <li><a href="#" onclick="showSection('exams')"><i class="fas fa-file-alt"></i> Exams</a></li>
+                <li><a href="#" onclick="showSection('content')"><i class="fas fa-folder"></i> Content Library</a></li>
+                <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <div class="topbar">
+                <h1 id="pageTitle">Admin Dashboard</h1>
+                <div class="user-info">
+                    <span id="userName">Admin</span>
+                    <div class="user-avatar" id="userAvatar">A</div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Overview Section -->
+                <div id="overviewSection" class="section-content">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <div class="icon"><i class="fas fa-book"></i></div>
+                            <h3>Total Courses</h3>
+                            <div class="stat" id="totalCourses">0</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="icon"><i class="fas fa-users"></i></div>
+                            <h3>Total Students</h3>
+                            <div class="stat" id="totalStudents">0</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="icon"><i class="fas fa-user-graduate"></i></div>
+                            <h3>Total Enrollments</h3>
+                            <div class="stat" id="totalEnrollments">0</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="icon"><i class="fas fa-clipboard-check"></i></div>
+                            <h3>Total Quizzes</h3>
+                            <div class="stat" id="totalQuizzes">0</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Recent Enrollments</h2>
+                        </div>
+                        <div id="recentEnrollments"></div>
+                    </div>
+                </div>
+
+                <!-- Courses Section -->
+                <div id="coursesSection" class="section-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>All Courses</h2>
+                            <button class="btn btn-primary" onclick="showAddCourseModal()"><i class="fas fa-plus"></i> Add Course</button>
+                        </div>
+                        <div id="coursesList"></div>
+                    </div>
+                </div>
+
+                <!-- Students Section -->
+                <div id="studentsSection" class="section-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>All Students</h2>
+                        </div>
+                        <div id="studentsList"></div>
+                    </div>
+                </div>
+
+                <!-- Quizzes Section -->
+                <div id="quizzesSection" class="section-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>All Quizzes</h2>
+                            <button class="btn btn-primary" onclick="showAddQuizModal()"><i class="fas fa-plus"></i> Add Quiz</button>
+                        </div>
+                        <div id="quizzesList"></div>
+                    </div>
+                </div>
+
+                <!-- Assignments Section -->
+                <div id="assignmentsSection" class="section-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>All Assignments</h2>
+                            <button class="btn btn-primary" onclick="showAddAssignmentModal()"><i class="fas fa-plus"></i> Add Assignment</button>
+                        </div>
+                        <div id="assignmentsList"></div>
+                    </div>
+                </div>
+
+                <!-- Exams Section -->
+                <div id="examsSection" class="section-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>All Exams</h2>
+                            <button class="btn btn-primary" onclick="showAddExamModal()"><i class="fas fa-plus"></i> Add Exam</button>
+                        </div>
+                        <div id="examsList"></div>
+                    </div>
+                </div>
+
+                <!-- Content Library Section -->
+                <div id="contentSection" class="section-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Videos</h2>
+                            <button class="btn btn-primary" onclick="showAddVideoModal()"><i class="fas fa-plus"></i> Add Video</button>
+                        </div>
+                        <div id="videosList"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>PDF Documents</h2>
+                            <button class="btn btn-primary" onclick="showAddPDFModal()"><i class="fas fa-plus"></i> Add PDF</button>
+                        </div>
+                        <div id="pdfsList"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Course Modal -->
+    <div id="addCourseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Course</h2>
+                <span class="modal-close" onclick="closeModal('addCourseModal')">&times;</span>
+            </div>
+            <form id="addCourseForm">
+                <div class="form-group">
+                    <label>Course Title</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Instructor</label>
+                    <input type="text" name="instructor" value="Amr Alsariti" required>
+                </div>
+                <div class="form-group">
+                    <label>Duration (hours)</label>
+                    <input type="text" name="duration" placeholder="e.g., 12 Hours" required>
+                </div>
+                <div class="form-group">
+                    <label>Number of Lectures</label>
+                    <input type="number" name="lectures" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Course</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Quiz Modal -->
+    <div id="addQuizModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Quiz</h2>
+                <span class="modal-close" onclick="closeModal('addQuizModal')">&times;</span>
+            </div>
+            <form id="addQuizForm">
+                <div class="form-group">
+                    <label>Quiz Title</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Course</label>
+                    <select name="courseId" id="quizCourseSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Duration (minutes)</label>
+                    <input type="number" name="duration" required>
+                </div>
+                <p style="color: #6b7280; margin-top: 1rem;">Note: Add questions after creating the quiz</p>
+                <button type="submit" class="btn btn-primary">Add Quiz</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Assignment Modal -->
+    <div id="addAssignmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Assignment</h2>
+                <span class="modal-close" onclick="closeModal('addAssignmentModal')">&times;</span>
+            </div>
+            <form id="addAssignmentForm">
+                <div class="form-group">
+                    <label>Assignment Title</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Course</label>
+                    <select name="courseId" id="assignmentCourseSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Due Date</label>
+                    <input type="date" name="dueDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Points</label>
+                    <input type="number" name="points" value="100" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Assignment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Exam Modal -->
+    <div id="addExamModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Exam</h2>
+                <span class="modal-close" onclick="closeModal('addExamModal')">&times;</span>
+            </div>
+            <form id="addExamForm">
+                <div class="form-group">
+                    <label>Exam Title</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Course</label>
+                    <select name="courseId" id="examCourseSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Duration (minutes)</label>
+                    <input type="number" name="duration" required>
+                </div>
+                <div class="form-group">
+                    <label>Total Questions</label>
+                    <input type="number" name="totalQuestions" required>
+                </div>
+                <div class="form-group">
+                    <label>Passing Score (%)</label>
+                    <input type="number" name="passingScore" value="70" required>
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" name="startDate" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Exam</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Video Modal -->
+    <div id="addVideoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Video</h2>
+                <span class="modal-close" onclick="closeModal('addVideoModal')">&times;</span>
+            </div>
+            <form id="addVideoForm">
+                <div class="form-group">
+                    <label>Video Title</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Course</label>
+                    <select name="courseId" id="videoCourseSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Video URL (YouTube embed or direct URL)</label>
+                    <input type="url" name="url" placeholder="https://www.youtube.com/embed/..." required>
+                </div>
+                <div class="form-group">
+                    <label>Duration</label>
+                    <input type="text" name="duration" placeholder="e.g., 15:30" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="2" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Video</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add PDF Modal -->
+    <div id="addPDFModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New PDF</h2>
+                <span class="modal-close" onclick="closeModal('addPDFModal')">&times;</span>
+            </div>
+            <form id="addPDFForm">
+                <div class="form-group">
+                    <label>PDF Title</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Course</label>
+                    <select name="courseId" id="pdfCourseSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>PDF URL</label>
+                    <input type="url" name="url" placeholder="https://..." required>
+                </div>
+                <div class="form-group">
+                    <label>Number of Pages</label>
+                    <input type="number" name="pages" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="2" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Add PDF</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/database.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

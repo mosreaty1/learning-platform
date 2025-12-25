@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Amr Alsariti Economics</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo" style="justify-content: center; margin-bottom: 1rem;">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Amr Alsariti Economics</span>
+                </div>
+                <h1>Welcome Back</h1>
+                <p>Login to access your courses and continue learning</p>
+            </div>
+
+            <div id="errorMessage" class="error-message"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter your password">
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-full">Login</button>
+                </div>
+            </form>
+
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
+                <p style="margin-top: 1rem;"><a href="index.html">Back to Home</a></p>
+            </div>
+
+            <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <p style="font-size: 0.875rem; color: #6b7280; text-align: center;">
+                    <strong>Demo Credentials:</strong><br>
+                    Admin: admin@amralsariti.com / admin123<br>
+                    Student: student@example.com / student123
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/database.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Clear previous error
+            errorMessage.style.display = 'none';
+            errorMessage.textContent = '';
+
+            // Find user
+            const user = DB.getUserByEmail(email);
+
+            if (!user) {
+                errorMessage.textContent = 'Invalid email or password';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            if (user.password !== password) {
+                errorMessage.textContent = 'Invalid email or password';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Login successful
+            DB.setCurrentUser(user);
+
+            // Redirect based on role
+            if (user.role === 'admin') {
+                window.location.href = 'admin-dashboard.html';
+            } else {
+                window.location.href = 'user-dashboard.html';
+            }
+        });
+    </script>
+</body>
+</html>

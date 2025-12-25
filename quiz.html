@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Amr Alsariti Economics</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-wrapper">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Amr Alsariti Economics</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="user-dashboard.html">Dashboard</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 2rem 20px;">
+        <div class="quiz-container">
+            <!-- Quiz Header -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1 id="quizTitle">Quiz</h1>
+                        <p id="quizInfo" style="color: #6b7280; margin-top: 0.5rem;"></p>
+                    </div>
+                    <div class="timer" id="timer">15:00</div>
+                </div>
+                <div class="progress-bar" style="margin-top: 1rem;">
+                    <div class="progress-fill" id="progressBar" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <!-- Quiz Content -->
+            <div id="quizContent"></div>
+
+            <!-- Results -->
+            <div id="resultsSection" style="display: none;">
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">
+                        <i class="fas fa-trophy" style="color: gold;"></i>
+                    </div>
+                    <h1>Quiz Completed!</h1>
+                    <div style="font-size: 3rem; font-weight: bold; color: var(--primary-color); margin: 2rem 0;">
+                        <span id="finalScore">0</span>%
+                    </div>
+                    <p style="font-size: 1.2rem; color: #6b7280; margin-bottom: 2rem;">
+                        You answered <span id="correctAnswers">0</span> out of <span id="totalQuestions">0</span> questions correctly
+                    </p>
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="user-dashboard.html" class="btn btn-primary">Back to Dashboard</a>
+                        <button class="btn btn-secondary" onclick="reviewAnswers()">Review Answers</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/database.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Check authentication
+        if (!checkAuth()) {
+            window.location.href = 'login.html';
+        }
+
+        // Get quiz ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const quizId = parseInt(urlParams.get('id'));
+        const currentUser = getCurrentUserInfo();
+
+        if (!quizId) {
+            alert('Invalid quiz');
+            window.location.href = 'user-dashboard.html';
+        }
+
+        const quiz = DB.getQuizById(quizId);
+        if (!quiz) {
+            alert('Quiz not found');
+            window.location.href = 'user-dashboard.html';
+        }
+
+        // Quiz state
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let timeRemaining = quiz.duration * 60; // Convert to seconds
+        let timerInterval;
+        let quizCompleted = false;
+
+        // Initialize quiz
+        document.getElementById('quizTitle').textContent = quiz.title;
+        document.getElementById('quizInfo').textContent = `${quiz.questions.length} questions • ${quiz.duration} minutes`;
+
+        function startQuiz() {
+            loadQuestion();
+            startTimer();
+        }
+
+        function loadQuestion() {
+            const question = quiz.questions[currentQuestionIndex];
+            const progress = ((currentQuestionIndex + 1) / quiz.questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            const content = document.getElementById('quizContent');
+            let html = `
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-number">Question ${currentQuestionIndex + 1} of ${quiz.questions.length}</span>
+                    </div>
+                    <h2 class="question-text">${question.question}</h2>
+                    <div class="options">
+            `;
+
+            question.options.forEach((option, index) => {
+                const isSelected = userAnswers[currentQuestionIndex] === index;
+                html += `
+                    <div class="option ${isSelected ? 'selected' : ''}" onclick="selectAnswer(${index})">
+                        <span>${String.fromCharCode(65 + index)}. ${option}</span>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+                <div class="quiz-navigation">
+                    <button class="btn btn-secondary" onclick="previousQuestion()" ${currentQuestionIndex === 0 ? 'disabled' : ''}>
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button class="btn btn-primary" onclick="nextQuestion()">
+                        ${currentQuestionIndex === quiz.questions.length - 1 ? 'Submit Quiz' : 'Next'} <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            `;
+
+            content.innerHTML = html;
+        }
+
+        function selectAnswer(optionIndex) {
+            userAnswers[currentQuestionIndex] = optionIndex;
+
+            // Update UI
+            document.querySelectorAll('.option').forEach((option, index) => {
+                if (index === optionIndex) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex === quiz.questions.length - 1) {
+                submitQuiz();
+            } else {
+                currentQuestionIndex++;
+                loadQuestion();
+            }
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Time is up! Submitting your quiz...');
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timer').textContent = display;
+
+            // Change color when time is running out
+            if (timeRemaining < 60) {
+                document.getElementById('timer').style.backgroundColor = 'var(--danger-color)';
+            } else if (timeRemaining < 300) {
+                document.getElementById('timer').style.backgroundColor = 'var(--warning-color)';
+            }
+        }
+
+        function submitQuiz() {
+            if (quizCompleted) return;
+
+            clearInterval(timerInterval);
+            quizCompleted = true;
+
+            // Calculate score
+            let correctCount = 0;
+            quiz.questions.forEach((question, index) => {
+                if (userAnswers[index] === question.correctAnswer) {
+                    correctCount++;
+                }
+            });
+
+            const score = Math.round((correctCount / quiz.questions.length) * 100);
+
+            // Save result
+            DB.addQuizResult({
+                userId: currentUser.id,
+                quizId: quiz.id,
+                courseId: quiz.courseId,
+                score: score,
+                answers: userAnswers,
+                timeTaken: (quiz.duration * 60) - timeRemaining
+            });
+
+            // Show results
+            document.getElementById('quizContent').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('correctAnswers').textContent = correctCount;
+            document.getElementById('totalQuestions').textContent = quiz.questions.length;
+        }
+
+        function reviewAnswers() {
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('quizContent').style.display = 'block';
+            currentQuestionIndex = 0;
+            showReview();
+        }
+
+        function showReview() {
+            const question = quiz.questions[currentQuestionIndex];
+            const userAnswer = userAnswers[currentQuestionIndex];
+            const correctAnswer = question.correctAnswer;
+            const progress = ((currentQuestionIndex + 1) / quiz.questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            const content = document.getElementById('quizContent');
+            let html = `
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-number">Question ${currentQuestionIndex + 1} of ${quiz.questions.length}</span>
+                        <span class="badge ${userAnswer === correctAnswer ? 'badge-success' : 'badge-danger'}">
+                            ${userAnswer === correctAnswer ? 'Correct' : 'Incorrect'}
+                        </span>
+                    </div>
+                    <h2 class="question-text">${question.question}</h2>
+                    <div class="options">
+            `;
+
+            question.options.forEach((option, index) => {
+                let optionClass = 'option';
+                if (index === correctAnswer) {
+                    optionClass += ' correct';
+                } else if (index === userAnswer && userAnswer !== correctAnswer) {
+                    optionClass += ' incorrect';
+                }
+
+                html += `
+                    <div class="${optionClass}">
+                        <span>${String.fromCharCode(65 + index)}. ${option}</span>
+                        ${index === correctAnswer ? '<i class="fas fa-check" style="color: var(--success-color);"></i>' : ''}
+                        ${index === userAnswer && userAnswer !== correctAnswer ? '<i class="fas fa-times" style="color: var(--danger-color);"></i>' : ''}
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+                <div class="quiz-navigation">
+                    <button class="btn btn-secondary" onclick="reviewPrevious()" ${currentQuestionIndex === 0 ? 'disabled' : ''}>
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    ${currentQuestionIndex === quiz.questions.length - 1 ?
+                        '<a href="user-dashboard.html" class="btn btn-primary">Back to Dashboard</a>' :
+                        '<button class="btn btn-primary" onclick="reviewNext()">Next <i class="fas fa-arrow-right"></i></button>'}
+                </div>
+            `;
+
+            content.innerHTML = html;
+        }
+
+        function reviewPrevious() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showReview();
+            }
+        }
+
+        function reviewNext() {
+            if (currentQuestionIndex < quiz.questions.length - 1) {
+                currentQuestionIndex++;
+                showReview();
+            }
+        }
+
+        // Prevent accidental page close
+        window.addEventListener('beforeunload', function (e) {
+            if (!quizCompleted) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Start the quiz
+        startQuiz();
+    </script>
+</body>
+</html>

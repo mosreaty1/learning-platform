@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Amr Alsariti Economics</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-graduation-cap"></i>
+                <h2>Student Portal</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active" onclick="showSection('overview')"><i class="fas fa-home"></i> Overview</a></li>
+                <li><a href="#" onclick="showSection('courses')"><i class="fas fa-book"></i> My Courses</a></li>
+                <li><a href="#" onclick="showSection('quizzes')"><i class="fas fa-clipboard-check"></i> Quizzes</a></li>
+                <li><a href="#" onclick="showSection('assignments')"><i class="fas fa-tasks"></i> Assignments</a></li>
+                <li><a href="#" onclick="showSection('exams')"><i class="fas fa-file-alt"></i> Exams</a></li>
+                <li><a href="#" onclick="showSection('grades')"><i class="fas fa-chart-bar"></i> Grades</a></li>
+                <li><a href="#" onclick="showSection('profile')"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <div class="topbar">
+                <h1 id="pageTitle">Dashboard Overview</h1>
+                <div class="user-info">
+                    <span id="userName">Student</span>
+                    <div class="user-avatar" id="userAvatar">S</div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Overview Section -->
+                <div id="overviewSection" class="section-content">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <div class="icon"><i class="fas fa-book"></i></div>
+                            <h3>Enrolled Courses</h3>
+                            <div class="stat" id="enrolledCoursesCount">0</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="icon"><i class="fas fa-clipboard-check"></i></div>
+                            <h3>Completed Quizzes</h3>
+                            <div class="stat" id="completedQuizzesCount">0</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="icon"><i class="fas fa-tasks"></i></div>
+                            <h3>Pending Assignments</h3>
+                            <div class="stat" id="pendingAssignmentsCount">0</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="icon"><i class="fas fa-star"></i></div>
+                            <h3>Average Score</h3>
+                            <div class="stat" id="averageScore">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Recent Activity</h2>
+                        </div>
+                        <div id="recentActivity">
+                            <p style="text-align: center; color: #6b7280; padding: 2rem;">No recent activity</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Courses Section -->
+                <div id="coursesSection" class="section-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>My Enrolled Courses</h2>
+                            <button class="btn btn-primary" onclick="showAvailableCourses()">Browse Courses</button>
+                        </div>
+                        <div id="enrolledCoursesList"></div>
+                    </div>
+                </div>
+
+                <!-- Quizzes Section -->
+                <div id="quizzesSection" class="section-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Available Quizzes</h2>
+                        </div>
+                        <div id="quizzesList"></div>
+                    </div>
+                </div>
+
+                <!-- Assignments Section -->
+                <div id="assignmentsSection" class="section-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>My Assignments</h2>
+                        </div>
+                        <div id="assignmentsList"></div>
+                    </div>
+                </div>
+
+                <!-- Exams Section -->
+                <div id="examsSection" class="section-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Upcoming Exams</h2>
+                        </div>
+                        <div id="examsList"></div>
+                    </div>
+                </div>
+
+                <!-- Grades Section -->
+                <div id="gradesSection" class="section-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>My Grades</h2>
+                        </div>
+                        <div id="gradesList"></div>
+                    </div>
+                </div>
+
+                <!-- Profile Section -->
+                <div id="profileSection" class="section-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>My Profile</h2>
+                        </div>
+                        <div id="profileInfo"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Available Courses Modal -->
+    <div id="coursesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Available Courses</h2>
+                <span class="modal-close" onclick="closeModal('coursesModal')">&times;</span>
+            </div>
+            <div id="availableCoursesList"></div>
+        </div>
+    </div>
+
+    <script src="js/database.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/user.js"></script>
+    <script>
+        // Check authentication
+        if (!checkAuth()) {
+            window.location.href = 'login.html';
+        }
+
+        // Initialize dashboard
+        const currentUser = getCurrentUserInfo();
+        document.getElementById('userName').textContent = currentUser.name;
+        document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.section-content').forEach(sec => {
+                sec.style.display = 'none';
+            });
+
+            // Remove active class from all menu items
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Show selected section
+            const sectionMap = {
+                'overview': 'overviewSection',
+                'courses': 'coursesSection',
+                'quizzes': 'quizzesSection',
+                'assignments': 'assignmentsSection',
+                'exams': 'examsSection',
+                'grades': 'gradesSection',
+                'profile': 'profileSection'
+            };
+
+            const titleMap = {
+                'overview': 'Dashboard Overview',
+                'courses': 'My Courses',
+                'quizzes': 'Quizzes',
+                'assignments': 'Assignments',
+                'exams': 'Exams',
+                'grades': 'My Grades',
+                'profile': 'My Profile'
+            };
+
+            document.getElementById(sectionMap[section]).style.display = 'block';
+            document.getElementById('pageTitle').textContent = titleMap[section];
+            event.target.classList.add('active');
+
+            // Load section data
+            loadSectionData(section);
+        }
+
+        function loadSectionData(section) {
+            switch(section) {
+                case 'overview':
+                    loadOverview();
+                    break;
+                case 'courses':
+                    loadEnrolledCourses();
+                    break;
+                case 'quizzes':
+                    loadQuizzes();
+                    break;
+                case 'assignments':
+                    loadAssignments();
+                    break;
+                case 'exams':
+                    loadExams();
+                    break;
+                case 'grades':
+                    loadGrades();
+                    break;
+                case 'profile':
+                    loadProfile();
+                    break;
+            }
+        }
+
+        function loadOverview() {
+            const enrollments = DB.getUserEnrollments(currentUser.id);
+            const quizResults = DB.getUserQuizResults(currentUser.id);
+            const submissions = DB.getUserSubmissions(currentUser.id);
+            const assignments = DB.getAssignments();
+
+            document.getElementById('enrolledCoursesCount').textContent = enrollments.length;
+            document.getElementById('completedQuizzesCount').textContent = quizResults.length;
+
+            // Calculate pending assignments
+            const enrolledCourseIds = enrollments.map(e => e.courseId);
+            const pendingAssignments = assignments.filter(a =>
+                enrolledCourseIds.includes(a.courseId) &&
+                !submissions.some(s => s.assignmentId === a.id && s.userId === currentUser.id)
+            );
+            document.getElementById('pendingAssignmentsCount').textContent = pendingAssignments.length;
+
+            // Calculate average score
+            if (quizResults.length > 0) {
+                const avgScore = quizResults.reduce((sum, r) => sum + r.score, 0) / quizResults.length;
+                document.getElementById('averageScore').textContent = avgScore.toFixed(1) + '%';
+            } else {
+                document.getElementById('averageScore').textContent = '0%';
+            }
+        }
+
+        function loadEnrolledCourses() {
+            const enrollments = DB.getUserEnrollments(currentUser.id);
+            const container = document.getElementById('enrolledCoursesList');
+
+            if (enrollments.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">No enrolled courses yet. Browse available courses to get started!</p>';
+                return;
+            }
+
+            let html = '<div class="courses-grid">';
+            enrollments.forEach(enrollment => {
+                const course = DB.getCourseById(enrollment.courseId);
+                if (course) {
+                    html += `
+                        <div class="course-card">
+                            <div class="course-image">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="course-content">
+                                <h3>${course.title}</h3>
+                                <p>${course.description}</p>
+                                <div class="course-meta">
+                                    <span><i class="fas fa-video"></i> ${course.lectures} Lectures</span>
+                                    <span><i class="fas fa-clock"></i> ${course.duration}</span>
+                                </div>
+                                <a href="course.html?id=${course.id}" class="btn btn-primary btn-sm" style="margin-top: 1rem;">View Course</a>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function loadQuizzes() {
+            const enrollments = DB.getUserEnrollments(currentUser.id);
+            const enrolledCourseIds = enrollments.map(e => e.courseId);
+            const allQuizzes = DB.getQuizzes();
+            const availableQuizzes = allQuizzes.filter(q => enrolledCourseIds.includes(q.courseId));
+            const container = document.getElementById('quizzesList');
+
+            if (availableQuizzes.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">No quizzes available. Enroll in courses to access quizzes.</p>';
+                return;
+            }
+
+            let html = '<div class="table-container"><table><thead><tr><th>Quiz Title</th><th>Course</th><th>Questions</th><th>Duration</th><th>Action</th></tr></thead><tbody>';
+            availableQuizzes.forEach(quiz => {
+                const course = DB.getCourseById(quiz.courseId);
+                html += `
+                    <tr>
+                        <td>${quiz.title}</td>
+                        <td>${course ? course.title : 'N/A'}</td>
+                        <td>${quiz.questions.length}</td>
+                        <td>${quiz.duration} minutes</td>
+                        <td><a href="quiz.html?id=${quiz.id}" class="btn btn-primary btn-sm">Start Quiz</a></td>
+                    </tr>
+                `;
+            });
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        function loadAssignments() {
+            const enrollments = DB.getUserEnrollments(currentUser.id);
+            const enrolledCourseIds = enrollments.map(e => e.courseId);
+            const allAssignments = DB.getAssignments();
+            const availableAssignments = allAssignments.filter(a => enrolledCourseIds.includes(a.courseId));
+            const submissions = DB.getUserSubmissions(currentUser.id);
+            const container = document.getElementById('assignmentsList');
+
+            if (availableAssignments.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">No assignments available.</p>';
+                return;
+            }
+
+            let html = '<div class="table-container"><table><thead><tr><th>Assignment</th><th>Course</th><th>Due Date</th><th>Points</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+            availableAssignments.forEach(assignment => {
+                const course = DB.getCourseById(assignment.courseId);
+                const submission = submissions.find(s => s.assignmentId === assignment.id);
+                const dueDate = new Date(assignment.dueDate);
+                const isOverdue = dueDate < new Date() && !submission;
+
+                html += `
+                    <tr>
+                        <td>${assignment.title}</td>
+                        <td>${course ? course.title : 'N/A'}</td>
+                        <td>${dueDate.toLocaleDateString()}</td>
+                        <td>${assignment.points}</td>
+                        <td>
+                            ${submission ? '<span class="badge badge-success">Submitted</span>' :
+                              (isOverdue ? '<span class="badge badge-danger">Overdue</span>' :
+                              '<span class="badge badge-warning">Pending</span>')}
+                        </td>
+                        <td>
+                            ${submission ?
+                              '<button class="btn btn-sm btn-secondary" disabled>Submitted</button>' :
+                              `<a href="assignment.html?id=${assignment.id}" class="btn btn-primary btn-sm">Submit</a>`}
+                        </td>
+                    </tr>
+                `;
+            });
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        function loadExams() {
+            const enrollments = DB.getUserEnrollments(currentUser.id);
+            const enrolledCourseIds = enrollments.map(e => e.courseId);
+            const allExams = DB.getExams();
+            const availableExams = allExams.filter(e => enrolledCourseIds.includes(e.courseId));
+            const container = document.getElementById('examsList');
+
+            if (availableExams.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">No exams scheduled.</p>';
+                return;
+            }
+
+            let html = '<div class="table-container"><table><thead><tr><th>Exam Title</th><th>Course</th><th>Date</th><th>Duration</th><th>Questions</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+            availableExams.forEach(exam => {
+                const course = DB.getCourseById(exam.courseId);
+                const startDate = new Date(exam.startDate);
+
+                html += `
+                    <tr>
+                        <td>${exam.title}</td>
+                        <td>${course ? course.title : 'N/A'}</td>
+                        <td>${startDate.toLocaleDateString()}</td>
+                        <td>${exam.duration} minutes</td>
+                        <td>${exam.totalQuestions}</td>
+                        <td><span class="badge badge-primary">${exam.status}</span></td>
+                        <td>
+                            ${exam.status === 'upcoming' ?
+                              '<button class="btn btn-sm btn-secondary" disabled>Not Available</button>' :
+                              `<a href="exam.html?id=${exam.id}" class="btn btn-primary btn-sm">Start Exam</a>`}
+                        </td>
+                    </tr>
+                `;
+            });
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        function loadGrades() {
+            const quizResults = DB.getUserQuizResults(currentUser.id);
+            const examResults = DB.getUserExamResults(currentUser.id);
+            const container = document.getElementById('gradesList');
+
+            if (quizResults.length === 0 && examResults.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">No grades available yet.</p>';
+                return;
+            }
+
+            let html = '<div class="table-container"><table><thead><tr><th>Type</th><th>Title</th><th>Score</th><th>Date</th><th>Status</th></tr></thead><tbody>';
+
+            quizResults.forEach(result => {
+                const quiz = DB.getQuizById(result.quizId);
+                const completedDate = new Date(result.completedAt);
+                html += `
+                    <tr>
+                        <td>Quiz</td>
+                        <td>${quiz ? quiz.title : 'N/A'}</td>
+                        <td>${result.score}%</td>
+                        <td>${completedDate.toLocaleDateString()}</td>
+                        <td><span class="badge ${result.score >= 70 ? 'badge-success' : 'badge-danger'}">${result.score >= 70 ? 'Passed' : 'Failed'}</span></td>
+                    </tr>
+                `;
+            });
+
+            examResults.forEach(result => {
+                const exam = DB.getExamById(result.examId);
+                const completedDate = new Date(result.completedAt);
+                html += `
+                    <tr>
+                        <td>Exam</td>
+                        <td>${exam ? exam.title : 'N/A'}</td>
+                        <td>${result.score}%</td>
+                        <td>${completedDate.toLocaleDateString()}</td>
+                        <td><span class="badge ${result.score >= 70 ? 'badge-success' : 'badge-danger'}">${result.score >= 70 ? 'Passed' : 'Failed'}</span></td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        function loadProfile() {
+            const container = document.getElementById('profileInfo');
+            container.innerHTML = `
+                <div style="max-width: 600px;">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" value="${currentUser.name}" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" value="${currentUser.email}" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <input type="text" value="${currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1)}" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Member Since</label>
+                        <input type="text" value="${new Date(currentUser.createdAt).toLocaleDateString()}" class="form-control" readonly>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showAvailableCourses() {
+            const allCourses = DB.getCourses();
+            const enrollments = DB.getUserEnrollments(currentUser.id);
+            const enrolledIds = enrollments.map(e => e.courseId);
+            const availableCourses = allCourses.filter(c => !enrolledIds.includes(c.id));
+
+            const container = document.getElementById('availableCoursesList');
+
+            if (availableCourses.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 2rem;">You are enrolled in all available courses!</p>';
+            } else {
+                let html = '<div class="courses-grid">';
+                availableCourses.forEach(course => {
+                    html += `
+                        <div class="course-card">
+                            <div class="course-image">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="course-content">
+                                <h3>${course.title}</h3>
+                                <p>${course.description}</p>
+                                <div class="course-meta">
+                                    <span><i class="fas fa-video"></i> ${course.lectures} Lectures</span>
+                                    <span><i class="fas fa-clock"></i> ${course.duration}</span>
+                                </div>
+                                <button onclick="enrollInCourse(${course.id})" class="btn btn-primary btn-sm" style="margin-top: 1rem;">Enroll Now</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
+
+            document.getElementById('coursesModal').classList.add('active');
+        }
+
+        function enrollInCourse(courseId) {
+            DB.enrollUser(currentUser.id, courseId);
+            alert('Successfully enrolled in course!');
+            closeModal('coursesModal');
+            loadEnrolledCourses();
+            loadOverview();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Initial load
+        loadOverview();
+    </script>
+</body>
+</html>

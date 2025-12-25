@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam - Amr Alsariti Economics</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-wrapper">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Amr Alsariti Economics</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="user-dashboard.html">Dashboard</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 2rem 20px;">
+        <!-- Exam Start Screen -->
+        <div id="startScreen" class="card" style="max-width: 700px; margin: 0 auto; text-align: center;">
+            <div style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <h1 id="examTitle">Exam</h1>
+            <p id="examInfo" style="color: #6b7280; margin: 1rem 0;"></p>
+
+            <div style="background-color: var(--light-color); padding: 2rem; border-radius: 10px; margin: 2rem 0; text-align: left;">
+                <h3 style="margin-bottom: 1rem;">Exam Instructions:</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 0.5rem 0;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i> Answer all questions to the best of your ability</li>
+                    <li style="padding: 0.5rem 0;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i> You can navigate between questions</li>
+                    <li style="padding: 0.5rem 0;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i> The exam will auto-submit when time expires</li>
+                    <li style="padding: 0.5rem 0;"><i class="fas fa-check" style="color: var(--success-color); margin-right: 0.5rem;"></i> Passing score: <span id="passingScore">70</span>%</li>
+                    <li style="padding: 0.5rem 0;"><i class="fas fa-exclamation-triangle" style="color: var(--warning-color); margin-right: 0.5rem;"></i> Do not refresh or close this page</li>
+                </ul>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <a href="user-dashboard.html" class="btn btn-secondary">Cancel</a>
+                <button class="btn btn-primary" onclick="startExam()">
+                    <i class="fas fa-play"></i> Start Exam
+                </button>
+            </div>
+        </div>
+
+        <!-- Exam Content -->
+        <div id="examContainer" class="quiz-container" style="display: none;">
+            <!-- Exam Header -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h2 id="examTitleActive">Exam</h2>
+                        <p style="color: #6b7280;">Question <span id="currentQuestion">1</span> of <span id="totalQuestionsDisplay">50</span></p>
+                    </div>
+                    <div class="timer" id="timer" style="font-size: 1.5rem; padding: 1rem 2rem;">90:00</div>
+                </div>
+                <div class="progress-bar" style="margin-top: 1rem;">
+                    <div class="progress-fill" id="progressBar" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <!-- Question Display -->
+            <div id="questionContent"></div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" style="display: none;">
+            <div class="card" style="text-align: center; max-width: 700px; margin: 0 auto;">
+                <div id="resultIcon" style="font-size: 5rem; margin-bottom: 1rem;"></div>
+                <h1 id="resultTitle">Exam Completed!</h1>
+                <div style="font-size: 4rem; font-weight: bold; margin: 2rem 0;" id="scoreDisplay"></div>
+                <p style="font-size: 1.2rem; color: #6b7280; margin-bottom: 1rem;">
+                    You scored <span id="earnedPoints">0</span> out of <span id="totalPoints">0</span> points
+                </p>
+                <p id="resultMessage" style="font-size: 1.1rem; margin-bottom: 2rem;"></p>
+
+                <div style="background-color: var(--light-color); padding: 2rem; border-radius: 10px; margin: 2rem 0;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; text-align: center;">
+                        <div>
+                            <div style="color: #6b7280; font-size: 0.9rem;">Total Questions</div>
+                            <div style="font-size: 2rem; font-weight: bold;" id="resultTotalQuestions">0</div>
+                        </div>
+                        <div>
+                            <div style="color: #6b7280; font-size: 0.9rem;">Correct</div>
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--success-color);" id="resultCorrect">0</div>
+                        </div>
+                        <div>
+                            <div style="color: #6b7280; font-size: 0.9rem;">Incorrect</div>
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--danger-color);" id="resultIncorrect">0</div>
+                        </div>
+                        <div>
+                            <div style="color: #6b7280; font-size: 0.9rem;">Time Taken</div>
+                            <div style="font-size: 2rem; font-weight: bold;" id="resultTimeTaken">0m</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <a href="user-dashboard.html" class="btn btn-primary">
+                        <i class="fas fa-home"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/database.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Check authentication
+        if (!checkAuth()) {
+            window.location.href = 'login.html';
+        }
+
+        // Get exam ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const examId = parseInt(urlParams.get('id'));
+        const currentUser = getCurrentUserInfo();
+
+        if (!examId) {
+            alert('Invalid exam');
+            window.location.href = 'user-dashboard.html';
+        }
+
+        const exam = DB.getExamById(examId);
+        if (!exam) {
+            alert('Exam not found');
+            window.location.href = 'user-dashboard.html';
+        }
+
+        // Generate exam questions (using quiz questions for demo)
+        const quizzes = DB.getQuizzesByCourse(exam.courseId);
+        let examQuestions = [];
+        quizzes.forEach(quiz => {
+            examQuestions = examQuestions.concat(quiz.questions);
+        });
+
+        // Limit to exam's total questions
+        if (examQuestions.length > exam.totalQuestions) {
+            examQuestions = examQuestions.slice(0, exam.totalQuestions);
+        }
+
+        // Exam state
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let timeRemaining = exam.duration * 60; // Convert to seconds
+        let timerInterval;
+        let examCompleted = false;
+        let startTime;
+
+        // Initialize start screen
+        document.getElementById('examTitle').textContent = exam.title;
+        document.getElementById('examInfo').textContent = `${examQuestions.length} questions • ${exam.duration} minutes • Passing Score: ${exam.passingScore}%`;
+        document.getElementById('passingScore').textContent = exam.passingScore;
+
+        function startExam() {
+            startTime = Date.now();
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('examContainer').style.display = 'block';
+            document.getElementById('examTitleActive').textContent = exam.title;
+            document.getElementById('totalQuestionsDisplay').textContent = examQuestions.length;
+            loadQuestion();
+            startTimer();
+        }
+
+        function loadQuestion() {
+            const question = examQuestions[currentQuestionIndex];
+            const progress = ((currentQuestionIndex + 1) / examQuestions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+
+            const content = document.getElementById('questionContent');
+            let html = `
+                <div class="question-card">
+                    <h2 class="question-text">${question.question}</h2>
+                    <div class="options">
+            `;
+
+            question.options.forEach((option, index) => {
+                const isSelected = userAnswers[currentQuestionIndex] === index;
+                html += `
+                    <div class="option ${isSelected ? 'selected' : ''}" onclick="selectAnswer(${index})">
+                        <span>${String.fromCharCode(65 + index)}. ${option}</span>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+                <div class="quiz-navigation">
+                    <button class="btn btn-secondary" onclick="previousQuestion()" ${currentQuestionIndex === 0 ? 'disabled' : ''}>
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <span style="color: #6b7280; padding: 0.875rem;">
+                            Answered: ${userAnswers.filter(a => a !== undefined).length}/${examQuestions.length}
+                        </span>
+                        <button class="btn btn-primary" onclick="nextQuestion()">
+                            ${currentQuestionIndex === examQuestions.length - 1 ? '<i class="fas fa-check"></i> Submit Exam' : 'Next <i class="fas fa-arrow-right"></i>'}
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            content.innerHTML = html;
+        }
+
+        function selectAnswer(optionIndex) {
+            userAnswers[currentQuestionIndex] = optionIndex;
+
+            // Update UI
+            document.querySelectorAll('.option').forEach((option, index) => {
+                if (index === optionIndex) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex === examQuestions.length - 1) {
+                const unanswered = examQuestions.length - userAnswers.filter(a => a !== undefined).length;
+                if (unanswered > 0) {
+                    if (!confirm(`You have ${unanswered} unanswered question(s). Do you want to submit the exam?`)) {
+                        return;
+                    }
+                }
+                submitExam();
+            } else {
+                currentQuestionIndex++;
+                loadQuestion();
+            }
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Time is up! Your exam is being submitted...');
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timer').textContent = display;
+
+            // Change color based on time
+            if (timeRemaining < 300) { // Less than 5 minutes
+                document.getElementById('timer').style.backgroundColor = 'var(--danger-color)';
+            } else if (timeRemaining < 600) { // Less than 10 minutes
+                document.getElementById('timer').style.backgroundColor = 'var(--warning-color)';
+            }
+        }
+
+        function submitExam() {
+            if (examCompleted) return;
+
+            clearInterval(timerInterval);
+            examCompleted = true;
+
+            // Calculate score
+            let correctCount = 0;
+            examQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.correctAnswer) {
+                    correctCount++;
+                }
+            });
+
+            const score = Math.round((correctCount / examQuestions.length) * 100);
+            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+            const passed = score >= exam.passingScore;
+
+            // Save result
+            DB.addExamResult({
+                userId: currentUser.id,
+                examId: exam.id,
+                courseId: exam.courseId,
+                score: score,
+                answers: userAnswers,
+                timeTaken: timeTaken,
+                passed: passed
+            });
+
+            // Show results
+            displayResults(score, correctCount, examQuestions.length, timeTaken, passed);
+        }
+
+        function displayResults(score, correct, total, timeTaken, passed) {
+            document.getElementById('examContainer').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'block';
+
+            // Set icon and title based on pass/fail
+            if (passed) {
+                document.getElementById('resultIcon').innerHTML = '<i class="fas fa-trophy" style="color: gold;"></i>';
+                document.getElementById('resultTitle').textContent = 'Congratulations! You Passed!';
+                document.getElementById('scoreDisplay').innerHTML = `<span style="color: var(--success-color);">${score}%</span>`;
+                document.getElementById('resultMessage').innerHTML = '<span class="badge badge-success" style="font-size: 1.2rem; padding: 0.75rem 1.5rem;">PASSED</span>';
+            } else {
+                document.getElementById('resultIcon').innerHTML = '<i class="fas fa-times-circle" style="color: var(--danger-color);"></i>';
+                document.getElementById('resultTitle').textContent = 'Exam Completed';
+                document.getElementById('scoreDisplay').innerHTML = `<span style="color: var(--danger-color);">${score}%</span>`;
+                document.getElementById('resultMessage').innerHTML = `<span class="badge badge-danger" style="font-size: 1.2rem; padding: 0.75rem 1.5rem;">DID NOT PASS - Minimum ${exam.passingScore}% required</span>`;
+            }
+
+            // Set statistics
+            document.getElementById('earnedPoints').textContent = correct;
+            document.getElementById('totalPoints').textContent = total;
+            document.getElementById('resultTotalQuestions').textContent = total;
+            document.getElementById('resultCorrect').textContent = correct;
+            document.getElementById('resultIncorrect').textContent = total - correct;
+
+            const minutes = Math.floor(timeTaken / 60);
+            const seconds = timeTaken % 60;
+            document.getElementById('resultTimeTaken').textContent = `${minutes}m ${seconds}s`;
+        }
+
+        // Prevent accidental page close
+        window.addEventListener('beforeunload', function (e) {
+            if (!examCompleted && document.getElementById('examContainer').style.display !== 'none') {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    </script>
+</body>
+</html>

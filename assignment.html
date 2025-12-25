@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment - Amr Alsariti Economics</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-wrapper">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Amr Alsariti Economics</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="user-dashboard.html">Dashboard</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 2rem 20px; max-width: 900px;">
+        <!-- Assignment Header -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
+                <div style="flex: 1;">
+                    <h1 id="assignmentTitle">Assignment</h1>
+                    <p id="assignmentCourse" style="color: #6b7280; margin-top: 0.5rem;"></p>
+                </div>
+                <div style="text-align: right;">
+                    <div style="color: #6b7280; font-size: 0.9rem;">Due Date</div>
+                    <div id="dueDate" style="font-weight: bold; font-size: 1.1rem;"></div>
+                    <div id="dueDateStatus"></div>
+                </div>
+            </div>
+            <div style="padding: 1rem; background-color: var(--light-color); border-radius: 5px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: #6b7280;">Points</span>
+                    <span style="font-weight: bold;" id="assignmentPoints">100</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignment Description -->
+        <div class="card">
+            <h2 style="margin-bottom: 1rem;">Assignment Description</h2>
+            <div id="assignmentDescription" style="line-height: 1.8;"></div>
+        </div>
+
+        <!-- Submission Form -->
+        <div class="card" id="submissionForm">
+            <h2 style="margin-bottom: 1rem;">Submit Your Work</h2>
+            <form id="submitAssignmentForm">
+                <div class="form-group">
+                    <label for="submissionText">Your Response</label>
+                    <textarea id="submissionText" name="submissionText" rows="10" required
+                              placeholder="Type your assignment response here..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="fileNote">File Upload (Note)</label>
+                    <div style="padding: 2rem; border: 2px dashed var(--border-color); border-radius: 5px; text-align: center; background-color: var(--light-color);">
+                        <i class="fas fa-upload" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                        <p style="color: #6b7280;">
+                            File upload would require a backend server. For this demo, please paste your content in the text area above.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" required style="margin-right: 0.5rem;">
+                        I certify that this is my original work
+                    </label>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <a href="user-dashboard.html" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Submit Assignment
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Already Submitted -->
+        <div class="card" id="alreadySubmitted" style="display: none; text-align: center;">
+            <div style="font-size: 4rem; color: var(--success-color); margin-bottom: 1rem;">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Assignment Already Submitted</h2>
+            <p style="color: #6b7280; margin: 1rem 0;">You submitted this assignment on <span id="submissionDate"></span></p>
+            <div style="background-color: var(--light-color); padding: 2rem; border-radius: 10px; margin: 2rem 0; text-align: left;">
+                <h3 style="margin-bottom: 1rem;">Your Submission:</h3>
+                <div id="submittedText" style="white-space: pre-wrap; line-height: 1.8;"></div>
+            </div>
+            <a href="user-dashboard.html" class="btn btn-primary">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script src="js/database.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Check authentication
+        if (!checkAuth()) {
+            window.location.href = 'login.html';
+        }
+
+        // Get assignment ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const assignmentId = parseInt(urlParams.get('id'));
+        const currentUser = getCurrentUserInfo();
+
+        if (!assignmentId) {
+            alert('Invalid assignment');
+            window.location.href = 'user-dashboard.html';
+        }
+
+        const assignment = DB.getAssignmentById(assignmentId);
+        if (!assignment) {
+            alert('Assignment not found');
+            window.location.href = 'user-dashboard.html';
+        }
+
+        const course = DB.getCourseById(assignment.courseId);
+
+        // Check if already submitted
+        const submissions = DB.getUserSubmissions(currentUser.id);
+        const existingSubmission = submissions.find(s => s.assignmentId === assignmentId);
+
+        // Load assignment details
+        document.getElementById('assignmentTitle').textContent = assignment.title;
+        document.getElementById('assignmentCourse').textContent = course ? course.title : 'N/A';
+        document.getElementById('assignmentDescription').textContent = assignment.description;
+        document.getElementById('assignmentPoints').textContent = assignment.points;
+
+        const dueDate = new Date(assignment.dueDate);
+        document.getElementById('dueDate').textContent = dueDate.toLocaleDateString();
+
+        // Check if overdue
+        const now = new Date();
+        if (dueDate < now && !existingSubmission) {
+            document.getElementById('dueDateStatus').innerHTML = '<span class="badge badge-danger" style="margin-top: 0.5rem;">Overdue</span>';
+        } else if (dueDate < now) {
+            document.getElementById('dueDateStatus').innerHTML = '<span class="badge badge-success" style="margin-top: 0.5rem;">Submitted</span>';
+        } else {
+            const daysLeft = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+            document.getElementById('dueDateStatus').innerHTML = `<span class="badge badge-warning" style="margin-top: 0.5rem;">${daysLeft} days left</span>`;
+        }
+
+        // Show appropriate section
+        if (existingSubmission) {
+            document.getElementById('submissionForm').style.display = 'none';
+            document.getElementById('alreadySubmitted').style.display = 'block';
+            document.getElementById('submissionDate').textContent = new Date(existingSubmission.submittedAt).toLocaleDateString();
+            document.getElementById('submittedText').textContent = existingSubmission.content;
+        }
+
+        // Handle form submission
+        document.getElementById('submitAssignmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const submissionText = document.getElementById('submissionText').value;
+
+            if (!submissionText.trim()) {
+                alert('Please enter your assignment response');
+                return;
+            }
+
+            // Create submission
+            const submission = {
+                userId: currentUser.id,
+                assignmentId: assignmentId,
+                courseId: assignment.courseId,
+                content: submissionText,
+                grade: null,
+                feedback: null
+            };
+
+            DB.addSubmission(submission);
+
+            alert('Assignment submitted successfully!');
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>
